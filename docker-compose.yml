@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg14
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: passwordgoeshere
+      POSTGRES_DB: sensor_data
+    ports:
+      - "5432:5432"
+    volumes:
+      - timescaledb_dataa:/var/lib/postgresql/data
+      - ./timescaledb_init.sql:/docker-entrypoint-initdb.d/timescaledb_init.sql
+
+  app:
+    build: .
+    environment:
+      - DB_NAME=sensor_data
+      - DB_USER=postgres
+      - DB_PASSWORD=passwordgoeshere
+      - DB_HOST=timescaledb
+      - DB_PORT=5432
+    ports:
+      - "127.0.0.1:5000:5000"
+    depends_on:
+      - timescaledb
+
+volumes:
+  timescaledb_dataa:
